@@ -1,0 +1,28 @@
+﻿<header class="app-topbar">
+    <div class="app-topbar-inner">
+        <a class="app-brand" href="">
+            <span class="brand-name">Days Off</span>
+            <span class="brand-pill">MVP</span>
+        </a>
+
+        <div class="app-nav-group">
+            <input type="checkbox" id="app-nav-toggle" class="nav-toggle" title="Navigation menu" />
+            <label class="nav-toggle-btn" for="app-nav-toggle">Menu</label>
+
+            <nav class="app-nav-links" onclick="document.getElementById('app-nav-toggle').checked = false;">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+                    Home
+                </NavLink>
+
+                <NavLink class="nav-link" href="schedule">
+                    <span class="bi bi-calendar3" aria-hidden="true"></span>
+                    Schedule
+                </NavLink>
+
+            </nav>
+
+        </div>
+    </div>
+</header>
+

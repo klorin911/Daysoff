@@ -1,0 +1,37 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@_theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="app-shell">
+    <NavMenu />
+
+    <main class="app-content">
+        <div class="content-wrapper">
+            @Body
+        </div>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">X</span>
+</div>
+
+@code {
+    private readonly MudTheme _theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1d4ed8",
+            Secondary = "#0f766e",
+            Background = "#f4f5f7",
+            Surface = "#ffffff",
+            TextPrimary = "#0b1220",
+            TextSecondary = "#5b6475"
+        }
+    };
+}
