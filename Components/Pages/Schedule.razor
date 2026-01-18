@@ -214,29 +214,123 @@
 
 @if (_yearSchedule.Count > 0)
 {
-    <div class="app-card p-4 mb-4">
-        <h5 class="card-title mb-4">Yearly Schedule View</h5>
-        <div class="table-responsive">
-            <table class="table table-sm align-middle schedule-table app-table">
-                <thead>
-                    <tr>
-                        <th>Week of</th>
-                        @foreach (var name in _dayNames)
-                        {
-                            <th>@name[..3]</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var week in _yearSchedule)
-                    {
+    @if (_previewMode == PreviewMode.Table)
+    {
+        <div class="app-card p-4 mb-4">
+            <div class="schedule-year-header mb-3">
+                <h5 class="card-title mb-0">Year View</h5>
+                <div class="schedule-year-actions">
+                    <div class="btn-group" role="group" aria-label="Schedule view">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Table ? "active" : "")"
+                                aria-pressed="@(_previewMode == PreviewMode.Table)"
+                                @onclick="() => SetPreviewModeAsync(PreviewMode.Table)">
+                            Table
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Calendar ? "active" : "")"
+                                aria-pressed="@(_previewMode == PreviewMode.Calendar)"
+                                @onclick="() => SetPreviewModeAsync(PreviewMode.Calendar)">
+                            Calendar
+                        </button>
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            @onclick="ToggleYearCollapse"
+                            aria-expanded="@(!_isYearCollapsed)">
+                        @(_isYearCollapsed ? "Show all months" : "Show fewer months")
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm align-middle schedule-table app-table">
+                    <thead>
                         <tr>
-                            <td class="text-nowrap fw-bold text-muted">@week.WeekStart.ToString("MMM dd")</td>
-                            @foreach (var day in week.Days)
+                            <th>Week of</th>
+                            @foreach (var name in _dayNames)
                             {
-                                <td class="p-2">
-                                    <div class="small text-muted mb-1">@day.Date.ToString("MM/dd")</div>
-                                    @if (!day.IsActive)
+                                <th>@name[..3]</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var week in VisibleWeeks)
+                        {
+                            <tr>
+                                <td class="text-nowrap fw-bold text-muted">@week.WeekStart.ToString("MMM dd")</td>
+                                @foreach (var day in week.Days)
+                                {
+                                    <td class="p-2">
+                                        <div class="small text-muted mb-1">@day.Date.ToString("MM/dd")</div>
+                                        @if (!day.IsActive)
+                                        {
+                                            <span class="status-chip status-chip--empty">-</span>
+                                        }
+                                        else if (day.IsWorkDay)
+                                        {
+                                            <span class="status-chip status-chip--work">Work</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-chip status-chip--off">Off</span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="app-card p-4 mb-4">
+            <div class="schedule-year-header mb-3">
+                <h5 class="card-title mb-0">Calendar View</h5>
+                <div class="schedule-year-actions">
+                    <div class="btn-group" role="group" aria-label="Schedule view">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Table ? "active" : "")"
+                                aria-pressed="@(_previewMode == PreviewMode.Table)"
+                                @onclick="() => SetPreviewModeAsync(PreviewMode.Table)">
+                            Table
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Calendar ? "active" : "")"
+                                aria-pressed="@(_previewMode == PreviewMode.Calendar)"
+                                @onclick="() => SetPreviewModeAsync(PreviewMode.Calendar)">
+                            Calendar
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => ShiftCalendarStart(-1)" aria-label="Previous month">‹</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => ShiftCalendarStart(1)" aria-label="Next month">›</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calendar-3up">
+                @foreach (var monthStart in VisibleCalendarMonths)
+                {
+                    <div class="calendar-month">
+                        <div class="calendar-month__title">@monthStart.ToString("MMMM yyyy")</div>
+                        <div class="calendar-grid">
+                            @foreach (var name in _dayNames)
+                            {
+                                <div class="calendar-cell calendar-cell--head">@name[..1]</div>
+                            }
+
+                            @foreach (var date in GetCalendarGridDates(monthStart))
+                            {
+                                var inMonth = date.Month == monthStart.Month && date.Year == monthStart.Year;
+                                var day = GetDayForDate(date);
+
+                                <div class="calendar-cell @(inMonth ? "" : "calendar-cell--muted")">
+                                    <div class="calendar-date">@date.Day</div>
+                                    @if (day is null || !day.IsActive)
                                     {
                                         <span class="status-chip status-chip--empty">-</span>
                                     }
@@ -248,14 +342,14 @@
                                     {
                                         <span class="status-chip status-chip--off">Off</span>
                                     }
-                                </td>
+                                </div>
                             }
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+    }
 }
 
 @code {
@@ -271,6 +365,9 @@
     private bool _isMonthPickerOpen;
     private int _visibleYear;
     private string? _openPicker;
+    private bool _isYearCollapsed = true;
+    private PreviewMode _previewMode = PreviewMode.Table;
+    private DateTime _calendarStartMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
     private static readonly string[] _monthShortNames =
         CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames[..12];
     private static readonly string[] _monthFullNames =
@@ -297,6 +394,17 @@
     private const string PlatoonPicker = "platoon";
     private const string RotatingPicker = "rotating";
 
+    private IReadOnlyList<WeekSchedule> VisibleWeeks => _isYearCollapsed
+        ? GetCollapsedWeeks()
+        : _yearSchedule;
+
+    private IReadOnlyList<DateTime> VisibleCalendarMonths =>
+    [
+        _calendarStartMonth,
+        _calendarStartMonth.AddMonths(1),
+        _calendarStartMonth.AddMonths(2)
+    ];
+
     protected override void OnInitialized()
     {
         _ = InitializeAsync();
@@ -321,6 +429,15 @@
         _selection.PlatoonDaysOff = selection.PlatoonDaysOff;
         _selection.RotatingOffStartDay = selection.RotatingOffStartDay;
         _visibleYear = _selection.StartMonth.Year;
+        _calendarStartMonth = _selection.StartMonth;
+
+        if (userId is Guid viewUserId)
+        {
+            var preferred = await ScheduleService.GetPreferredScheduleViewForUserAsync(viewUserId);
+            _previewMode = preferred?.Equals("calendar", StringComparison.OrdinalIgnoreCase) == true
+                ? PreviewMode.Calendar
+                : PreviewMode.Table;
+        }
 
         UpdatePreview();
         await InvokeAsync(StateHasChanged);
@@ -349,6 +466,17 @@
         }
 
         UpdatePreview();
+    }
+
+    private async Task SetPreviewModeAsync(PreviewMode mode)
+    {
+        _previewMode = mode;
+
+        var userId = await Auth.GetCurrentUserIdAsync();
+        if (userId is Guid id)
+        {
+            await ScheduleService.SavePreferredScheduleViewForUserAsync(id, mode == PreviewMode.Calendar ? "calendar" : "table");
+        }
     }
 
     private void ToggleMonthPicker()
@@ -411,6 +539,7 @@
     {
         _selection.StartMonth = new DateTime(_visibleYear, month, 1);
         _isMonthPickerOpen = false;
+        _calendarStartMonth = _selection.StartMonth;
         UpdatePreview();
     }
 
@@ -420,6 +549,7 @@
         _visibleYear = today.Year;
         _selection.StartMonth = new DateTime(today.Year, today.Month, 1);
         _isMonthPickerOpen = false;
+        _calendarStartMonth = _selection.StartMonth;
         UpdatePreview();
     }
 
@@ -466,6 +596,83 @@
 
         _yearSchedule = ScheduleService.BuildYearSchedule(GetStartDate());
         _statusMessage = null;
+    }
+
+    private void ToggleYearCollapse()
+    {
+        _isYearCollapsed = !_isYearCollapsed;
+    }
+
+    private IReadOnlyList<WeekSchedule> GetCollapsedWeeks()
+    {
+        if (_yearSchedule.Count == 0)
+        {
+            return Array.Empty<WeekSchedule>();
+        }
+
+        var firstVisibleMonth = _selection.StartMonth;
+        var lastVisibleMonth = firstVisibleMonth.AddMonths(3);
+        var start = new DateOnly(firstVisibleMonth.Year, firstVisibleMonth.Month, 1);
+        var endExclusive = new DateOnly(lastVisibleMonth.Year, lastVisibleMonth.Month, 1).AddMonths(1);
+        return _yearSchedule.Where(w => w.WeekStart < endExclusive && w.WeekStart.AddDays(7) > start).ToList();
+    }
+
+    private void ShiftCalendarStart(int deltaMonths)
+    {
+        _calendarStartMonth = _calendarStartMonth.AddMonths(deltaMonths);
+    }
+
+    private ScheduleDay? GetDayForDate(DateOnly date)
+    {
+        if (_yearSchedule.Count == 0)
+        {
+            return null;
+        }
+
+        foreach (var week in _yearSchedule)
+        {
+            for (var i = 0; i < week.Days.Count; i++)
+            {
+                var day = week.Days[i];
+                if (day.Date == date)
+                {
+                    return day;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static IReadOnlyList<DateOnly> GetCalendarGridDates(DateTime monthStart)
+    {
+        var start = new DateOnly(monthStart.Year, monthStart.Month, 1);
+        var endInclusive = start.AddMonths(1).AddDays(-1);
+
+        var first = GetWeekStart(start);
+        var last = GetWeekStart(endInclusive).AddDays(6);
+
+        var dates = new List<DateOnly>();
+        var d = first;
+        while (d <= last)
+        {
+            dates.Add(d);
+            d = d.AddDays(1);
+        }
+
+        return dates;
+    }
+
+    private static DateOnly GetWeekStart(DateOnly date)
+    {
+        var offset = (((int)date.DayOfWeek + 6) % 7 + 7) % 7;
+        return date.AddDays(-offset);
+    }
+
+    private enum PreviewMode
+    {
+        Table,
+        Calendar
     }
 
     private DateOnly GetStartDate()

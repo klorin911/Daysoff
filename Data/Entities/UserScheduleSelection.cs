@@ -13,5 +13,7 @@ public sealed class UserScheduleSelection
     public PlatoonDaysOffOption PlatoonDaysOff { get; set; }
     public RotatingOffStartDay RotatingOffStartDay { get; set; }
 
+    public string? PreferredScheduleView { get; set; }
+
     public DateTime UpdatedAtUtc { get; set; }
 }

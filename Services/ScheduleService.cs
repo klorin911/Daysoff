@@ -57,6 +57,40 @@ public sealed class ScheduleService
             persisted.RotatingOffStartDay);
     }
 
+    public async Task<string?> GetPreferredScheduleViewForUserAsync(Guid userId)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        return await db.UserScheduleSelections
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .Select(x => x.PreferredScheduleView)
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task SavePreferredScheduleViewForUserAsync(Guid userId, string preferredView)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var existing = await db.UserScheduleSelections.SingleOrDefaultAsync(x => x.UserId == userId);
+        if (existing is null)
+        {
+            existing = new UserScheduleSelection
+            {
+                UserId = userId,
+                ScheduleType = _selection.ScheduleType,
+                ShiftType = _selection.ShiftType,
+                StartDate = _selection.StartDate,
+                PlatoonDaysOff = _selection.PlatoonDaysOff,
+                RotatingOffStartDay = _selection.RotatingOffStartDay,
+                UpdatedAtUtc = DateTime.UtcNow
+            };
+            db.UserScheduleSelections.Add(existing);
+        }
+
+        existing.PreferredScheduleView = preferredView;
+        existing.UpdatedAtUtc = DateTime.UtcNow;
+        await db.SaveChangesAsync();
+    }
+
     public async Task SaveSelectionForUserAsync(Guid userId, ScheduleSelection selection)
     {
         await using var db = await _dbFactory.CreateDbContextAsync();

@@ -26,6 +26,9 @@ public sealed class DaysOffDbContext : DbContext
         {
             entity.HasKey(x => x.UserId);
 
+            entity.Property(x => x.PreferredScheduleView)
+                .HasMaxLength(32);
+
             entity.HasOne(x => x.User)
                 .WithOne(x => x.ScheduleSelection)
                 .HasForeignKey<UserScheduleSelection>(x => x.UserId)
