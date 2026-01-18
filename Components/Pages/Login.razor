@@ -1,0 +1,97 @@
+@page "/login"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using DaysOff.Services
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<PageTitle>Login</PageTitle>
+
+<div class="app-card p-4" style="max-width: 480px;">
+    <h3 class="mb-3">Login</h3>
+
+    <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="_model.Email" />
+            <ValidationMessage For="() => _model.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <InputText class="form-control" type="password" @bind-Value="_model.Password" />
+            <ValidationMessage For="() => _model.Password" />
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(_error))
+        {
+            <div class="text-danger mb-3">@_error</div>
+        }
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit" disabled="@_busy">
+                @(_mode == Mode.Login ? "Login" : "Register")
+            </button>
+            <button class="btn btn-outline-secondary" type="button" @onclick="ToggleMode" disabled="@_busy">
+                @(_mode == Mode.Login ? "Need an account?" : "Already have an account?")
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private readonly Model _model = new();
+    private Mode _mode = Mode.Login;
+    private bool _busy;
+    private string? _error;
+
+    private async Task HandleSubmit()
+    {
+        _busy = true;
+        _error = null;
+        try
+        {
+            (bool Success, string? Error) result = _mode == Mode.Login
+                ? await Auth.SignInAsync(_model.Email, _model.Password)
+                : await Auth.RegisterAndSignInAsync(_model.Email, _model.Password);
+
+            if (!result.Success)
+            {
+                _error = result.Error;
+            }
+            else
+            {
+                Nav.NavigateTo("/schedule", forceLoad: true);
+            }
+        }
+        finally
+        {
+            _busy = false;
+        }
+    }
+
+    private void ToggleMode()
+    {
+        _mode = _mode == Mode.Login ? Mode.Register : Mode.Login;
+        _error = null;
+    }
+
+    private enum Mode
+    {
+        Login,
+        Register
+    }
+
+    private sealed class Model
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+    }
+}

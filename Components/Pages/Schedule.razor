@@ -5,8 +5,14 @@
 @using DaysOff.Models
 @using DaysOff.Services
 @inject ScheduleService ScheduleService
+@inject AuthService Auth
 
 <PageTitle>Schedule Selection</PageTitle>
+
+@if (_isMonthPickerOpen || _openPicker is not null)
+{
+    <button type="button" class="picker-backdrop" @onclick="CloseAllPickers" aria-hidden="true"></button>
+}
 
 <div class="selection-section">
     <div class="selection-header">
@@ -18,47 +24,180 @@
         <div class="selection-fields">
             <div class="selection-field">
                 <label class="form-label" for="schedule-type">Schedule</label>
-                <select id="schedule-type" class="form-select" @bind="_selection.ScheduleType" @bind:after="UpdatePreview">
-                    <option value="@ScheduleType.FiveByEight">5x8</option>
-                    <option value="@ScheduleType.PlatoonTen">Platoon 10s</option>
-                    <option value="@ScheduleType.RotatingFourByTen">Rotating 4x10</option>
-                </select>
+                <div class="month-picker">
+                    <button id="schedule-type"
+                            type="button"
+                            class="form-control month-picker__toggle @(IsPickerOpen(SchedulePicker) ? "is-open" : "")"
+                            @onclick="() => TogglePicker(SchedulePicker)"
+                            aria-haspopup="dialog"
+                            aria-expanded="@IsPickerOpen(SchedulePicker)"
+                            aria-controls="schedule-panel">
+                        <span>@GetScheduleLabel(_selection.ScheduleType)</span>
+                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                    </button>
+                    @if (IsPickerOpen(SchedulePicker))
+                    {
+                        <div id="schedule-panel" class="month-picker__panel month-picker__panel--list month-picker__panel--attached" role="dialog" aria-label="Choose schedule">
+                            <div class="month-picker__grid month-picker__grid--list">
+                                @foreach (var option in _scheduleOptions)
+                                {
+                                    var isSelected = _selection.ScheduleType == option.Value;
+                                    <button type="button"
+                                            class="month-picker__month @(isSelected ? "is-selected" : "")"
+                                            @onclick="() => SelectSchedule(option.Value)"
+                                            aria-label="@option.Label">
+                                        @option.Label
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
             
             <div class="selection-field">
                 <label class="form-label" for="shift-type">Shift</label>
-                <select id="shift-type" class="form-select" @bind="_selection.ShiftType" @bind:after="UpdatePreview">
-                    <option value="@ShiftType.Day">Day</option>
-                    <option value="@ShiftType.Swing">Swing</option>
-                    <option value="@ShiftType.Mid">Mid</option>
-                </select>
+                <div class="month-picker">
+                    <button id="shift-type"
+                            type="button"
+                            class="form-control month-picker__toggle @(IsPickerOpen(ShiftPicker) ? "is-open" : "")"
+                            @onclick="() => TogglePicker(ShiftPicker)"
+                            aria-haspopup="dialog"
+                            aria-expanded="@IsPickerOpen(ShiftPicker)"
+                            aria-controls="shift-panel">
+                        <span>@GetShiftLabel(_selection.ShiftType)</span>
+                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                    </button>
+                    @if (IsPickerOpen(ShiftPicker))
+                    {
+                        <div id="shift-panel" class="month-picker__panel month-picker__panel--list month-picker__panel--attached" role="dialog" aria-label="Choose shift">
+                            <div class="month-picker__grid month-picker__grid--list">
+                                @foreach (var option in _shiftOptions)
+                                {
+                                    var isSelected = _selection.ShiftType == option.Value;
+                                    <button type="button"
+                                            class="month-picker__month @(isSelected ? "is-selected" : "")"
+                                            @onclick="() => SelectShift(option.Value)"
+                                            aria-label="@option.Label">
+                                        @option.Label
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
             
             <div class="selection-field">
                 <label class="form-label" for="start-month">Start Month</label>
-                <input id="start-month" class="form-control" type="month" value="@_selection.StartMonth.ToString("yyyy-MM")" @onchange="OnMonthChanged" />
+                <div class="month-picker">
+                    <button id="start-month"
+                            type="button"
+                            class="form-control month-picker__toggle @(_isMonthPickerOpen ? "is-open" : "")"
+                            @onclick="ToggleMonthPicker"
+                            aria-haspopup="dialog"
+                            aria-expanded="@_isMonthPickerOpen"
+                            aria-controls="start-month-panel">
+                        <span>@_selection.StartMonth.ToString("MMMM yyyy")</span>
+                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                    </button>
+                    @if (_isMonthPickerOpen)
+                    {
+                        <div id="start-month-panel" class="month-picker__panel month-picker__panel--attached" role="dialog" aria-label="Choose start month">
+                            <div class="month-picker__header">
+                                <button type="button" class="month-picker__nav" @onclick="() => ChangeYear(-1)" aria-label="Previous year">‹</button>
+                                <div class="month-picker__year">@_visibleYear</div>
+                                <button type="button" class="month-picker__nav" @onclick="() => ChangeYear(1)" aria-label="Next year">›</button>
+                            </div>
+                            <div class="month-picker__grid">
+                                @for (var i = 0; i < 12; i++)
+                                {
+                                    var month = i + 1;
+                                    var isSelected = _selection.StartMonth.Year == _visibleYear && _selection.StartMonth.Month == month;
+                                    <button type="button"
+                                            class="month-picker__month @(isSelected ? "is-selected" : "")"
+                                            @onclick="() => SelectMonth(month)"
+                                            aria-label="@_monthFullNames[i]">
+                                        @_monthShortNames[i]
+                                    </button>
+                                }
+                            </div>
+                            <div class="month-picker__footer">
+                                <button type="button" class="month-picker__action" @onclick="SelectThisMonth">This month</button>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
 
             @if (_selection.ScheduleType == ScheduleType.PlatoonTen)
             {
                 <div class="selection-field">
                     <label class="form-label" for="platoon-days">Days Off</label>
-                    <select id="platoon-days" class="form-select" @bind="_selection.PlatoonDaysOff" @bind:after="UpdatePreview">
-                        <option value="@PlatoonDaysOffOption.MonTue">Mon/Tue</option>
-                        <option value="@PlatoonDaysOffOption.ThuFri">Thu/Fri</option>
-                    </select>
+                    <div class="month-picker">
+                        <button id="platoon-days"
+                                type="button"
+                                class="form-control month-picker__toggle @(IsPickerOpen(PlatoonPicker) ? "is-open" : "")"
+                                @onclick="() => TogglePicker(PlatoonPicker)"
+                                aria-haspopup="dialog"
+                                aria-expanded="@IsPickerOpen(PlatoonPicker)"
+                                aria-controls="platoon-panel">
+                            <span>@GetPlatoonDaysOffLabel(_selection.PlatoonDaysOff)</span>
+                            <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                        </button>
+                        @if (IsPickerOpen(PlatoonPicker))
+                        {
+                            <div id="platoon-panel" class="month-picker__panel month-picker__panel--list month-picker__panel--attached" role="dialog" aria-label="Choose days off">
+                                <div class="month-picker__grid month-picker__grid--list">
+                                    @foreach (var option in _platoonDaysOffOptions)
+                                    {
+                                        var isSelected = _selection.PlatoonDaysOff == option.Value;
+                                        <button type="button"
+                                                class="month-picker__month @(isSelected ? "is-selected" : "")"
+                                                @onclick="() => SelectPlatoonDaysOff(option.Value)"
+                                                aria-label="@option.Label">
+                                            @option.Label
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             }
             else if (_selection.ScheduleType == ScheduleType.RotatingFourByTen)
             {
                 <div class="selection-field">
                     <label class="form-label" for="rotating-days">Starting Days Off</label>
-                    <select id="rotating-days" class="form-select" @bind="_selection.RotatingOffStartDay" @bind:after="UpdatePreview">
-                        @foreach (var day in _rotatingOffDays)
+                    <div class="month-picker">
+                        <button id="rotating-days"
+                                type="button"
+                                class="form-control month-picker__toggle @(IsPickerOpen(RotatingPicker) ? "is-open" : "")"
+                                @onclick="() => TogglePicker(RotatingPicker)"
+                                aria-haspopup="dialog"
+                                aria-expanded="@IsPickerOpen(RotatingPicker)"
+                                aria-controls="rotating-panel">
+                            <span>@GetRotatingOffLabel(_selection.RotatingOffStartDay)</span>
+                            <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                        </button>
+                        @if (IsPickerOpen(RotatingPicker))
                         {
-                            <option value="@day">@GetRotatingOffLabel(day)</option>
+                            <div id="rotating-panel" class="month-picker__panel month-picker__panel--list month-picker__panel--attached" role="dialog" aria-label="Choose starting days off">
+                                <div class="month-picker__grid month-picker__grid--list">
+                                    @foreach (var day in _rotatingOffDays)
+                                    {
+                                        var isSelected = _selection.RotatingOffStartDay == day;
+                                        <button type="button"
+                                                class="month-picker__month @(isSelected ? "is-selected" : "")"
+                                                @onclick="() => SelectRotatingOffStartDay(day)"
+                                                aria-label="@GetRotatingOffLabel(day)">
+                                            @GetRotatingOffLabel(day)
+                                        </button>
+                                    }
+                                </div>
+                            </div>
                         }
-                    </select>
+                    </div>
                 </div>
             }
         </div>
@@ -129,39 +268,191 @@
     private readonly RotatingOffStartDay[] _rotatingOffDays = Enum.GetValues<RotatingOffStartDay>();
     private IReadOnlyList<WeekSchedule> _yearSchedule = Array.Empty<WeekSchedule>();
     private string? _statusMessage;
+    private bool _isMonthPickerOpen;
+    private int _visibleYear;
+    private string? _openPicker;
+    private static readonly string[] _monthShortNames =
+        CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames[..12];
+    private static readonly string[] _monthFullNames =
+        CultureInfo.CurrentCulture.DateTimeFormat.MonthNames[..12];
+    private static readonly (ScheduleType Value, string Label)[] _scheduleOptions =
+    [
+        (ScheduleType.FiveByEight, "5x8"),
+        (ScheduleType.PlatoonTen, "Platoon 10s"),
+        (ScheduleType.RotatingFourByTen, "Rotating 4x10")
+    ];
+    private static readonly (ShiftType Value, string Label)[] _shiftOptions =
+    [
+        (ShiftType.Day, "Day"),
+        (ShiftType.Swing, "Swing"),
+        (ShiftType.Mid, "Mid")
+    ];
+    private static readonly (PlatoonDaysOffOption Value, string Label)[] _platoonDaysOffOptions =
+    [
+        (PlatoonDaysOffOption.MonTue, "Mon/Tue"),
+        (PlatoonDaysOffOption.ThuFri, "Thu/Fri")
+    ];
+    private const string SchedulePicker = "schedule";
+    private const string ShiftPicker = "shift";
+    private const string PlatoonPicker = "platoon";
+    private const string RotatingPicker = "rotating";
 
     protected override void OnInitialized()
     {
-        var selection = ScheduleService.GetSelection();
+        _ = InitializeAsync();
+    }
+
+    private async Task InitializeAsync()
+    {
+        var userId = await Auth.GetCurrentUserIdAsync();
+        ScheduleSelection selection;
+        if (userId is Guid id)
+        {
+            selection = await ScheduleService.GetSelectionForUserAsync(id) ?? ScheduleService.GetSelection();
+        }
+        else
+        {
+            selection = ScheduleService.GetSelection();
+        }
+
         _selection.ScheduleType = selection.ScheduleType;
         _selection.ShiftType = selection.ShiftType;
         _selection.StartMonth = new DateTime(selection.StartDate.Year, selection.StartDate.Month, 1);
         _selection.PlatoonDaysOff = selection.PlatoonDaysOff;
         _selection.RotatingOffStartDay = selection.RotatingOffStartDay;
+        _visibleYear = _selection.StartMonth.Year;
 
         UpdatePreview();
+        await InvokeAsync(StateHasChanged);
     }
 
-    private void SaveSelection()
+    private async Task SaveSelection()
     {
-        ScheduleService.UpdateSelection(new ScheduleSelection(
+        var selection = new ScheduleSelection(
             _selection.ScheduleType,
             _selection.ShiftType,
             GetStartDate(),
             _selection.PlatoonDaysOff,
-            _selection.RotatingOffStartDay));
+            _selection.RotatingOffStartDay);
 
-        _statusMessage = "Schedule saved.";
+        ScheduleService.UpdateSelection(selection);
+
+        var userId = await Auth.GetCurrentUserIdAsync();
+        if (userId is Guid id)
+        {
+            await ScheduleService.SaveSelectionForUserAsync(id, selection);
+            _statusMessage = "Schedule saved.";
+        }
+        else
+        {
+            _statusMessage = "Log in to save your schedule.";
+        }
+
         UpdatePreview();
     }
 
-    private void OnMonthChanged(ChangeEventArgs args)
+    private void ToggleMonthPicker()
     {
-        if (args.Value is string value && DateTime.TryParseExact(value, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+        _openPicker = null;
+        _isMonthPickerOpen = !_isMonthPickerOpen;
+    }
+
+    private void CloseAllPickers()
+    {
+        _isMonthPickerOpen = false;
+        _openPicker = null;
+    }
+
+    private void TogglePicker(string picker)
+    {
+        _isMonthPickerOpen = false;
+        _openPicker = _openPicker == picker ? null : picker;
+    }
+
+    private bool IsPickerOpen(string picker)
+    {
+        return _openPicker == picker;
+    }
+
+    private void SelectSchedule(ScheduleType scheduleType)
+    {
+        _selection.ScheduleType = scheduleType;
+        _openPicker = null;
+        UpdatePreview();
+    }
+
+    private void SelectShift(ShiftType shiftType)
+    {
+        _selection.ShiftType = shiftType;
+        _openPicker = null;
+        UpdatePreview();
+    }
+
+    private void SelectPlatoonDaysOff(PlatoonDaysOffOption option)
+    {
+        _selection.PlatoonDaysOff = option;
+        _openPicker = null;
+        UpdatePreview();
+    }
+
+    private void SelectRotatingOffStartDay(RotatingOffStartDay day)
+    {
+        _selection.RotatingOffStartDay = day;
+        _openPicker = null;
+        UpdatePreview();
+    }
+
+    private void ChangeYear(int delta)
+    {
+        _visibleYear += delta;
+    }
+
+    private void SelectMonth(int month)
+    {
+        _selection.StartMonth = new DateTime(_visibleYear, month, 1);
+        _isMonthPickerOpen = false;
+        UpdatePreview();
+    }
+
+    private void SelectThisMonth()
+    {
+        var today = DateTime.Today;
+        _visibleYear = today.Year;
+        _selection.StartMonth = new DateTime(today.Year, today.Month, 1);
+        _isMonthPickerOpen = false;
+        UpdatePreview();
+    }
+
+    private static string GetScheduleLabel(ScheduleType scheduleType)
+    {
+        return scheduleType switch
         {
-            _selection.StartMonth = new DateTime(parsed.Year, parsed.Month, 1);
-            UpdatePreview();
-        }
+            ScheduleType.FiveByEight => "5x8",
+            ScheduleType.PlatoonTen => "Platoon 10s",
+            ScheduleType.RotatingFourByTen => "Rotating 4x10",
+            _ => scheduleType.ToString()
+        };
+    }
+
+    private static string GetShiftLabel(ShiftType shiftType)
+    {
+        return shiftType switch
+        {
+            ShiftType.Day => "Day",
+            ShiftType.Swing => "Swing",
+            ShiftType.Mid => "Mid",
+            _ => shiftType.ToString()
+        };
+    }
+
+    private static string GetPlatoonDaysOffLabel(PlatoonDaysOffOption option)
+    {
+        return option switch
+        {
+            PlatoonDaysOffOption.MonTue => "Mon/Tue",
+            PlatoonDaysOffOption.ThuFri => "Thu/Fri",
+            _ => option.ToString()
+        };
     }
 
     private void UpdatePreview()

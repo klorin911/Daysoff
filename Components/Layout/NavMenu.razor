@@ -1,4 +1,5 @@
 ﻿<header class="app-topbar">
+	@using Microsoft.AspNetCore.Components.Authorization
     <div class="app-topbar-inner">
         <a class="app-brand" href="">
             <span class="brand-name">Days Off</span>
@@ -20,9 +21,28 @@
                     Schedule
                 </NavLink>
 
+				<AuthorizeView>
+					<Authorized>
+						<button type="button" class="nav-link btn btn-link" style="padding: 0;" @onclick="Logout">
+							Logout
+						</button>
+					</Authorized>
+					<NotAuthorized>
+						<NavLink class="nav-link" href="login">
+							Login
+						</NavLink>
+					</NotAuthorized>
+				</AuthorizeView>
+
             </nav>
 
         </div>
     </div>
 </header>
+
+@code {
+    [Inject] private DaysOff.Services.AuthService Auth { get; set; } = null!;
+
+    private Task Logout() => Auth.SignOutAsync();
+}
 

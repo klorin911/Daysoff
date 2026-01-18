@@ -1,0 +1,25 @@
+@page "/logout"
+
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager Nav
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        var returnUrl = query.TryGetValue("returnUrl", out var returnUrlRaw)
+            ? returnUrlRaw.ToString()
+            : "/";
+
+        var http = HttpContextAccessor.HttpContext;
+        if (http is not null)
+        {
+            await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        }
+
+        Nav.NavigateTo(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+    }
+}

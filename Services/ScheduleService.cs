@@ -1,15 +1,20 @@
 using DaysOff.Models;
+using DaysOff.Data;
+using DaysOff.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DaysOff.Services;
 
 public sealed class ScheduleService
 {
+    private readonly IDbContextFactory<DaysOffDbContext> _dbFactory;
     private readonly Employee _employee;
     private readonly List<ShiftDifferential> _differentials;
     private ScheduleSelection _selection;
 
-    public ScheduleService()
+    public ScheduleService(IDbContextFactory<DaysOffDbContext> dbFactory)
     {
+        _dbFactory = dbFactory;
         _employee = new Employee(Guid.NewGuid(), "Alex Morgan", "Operations", 26.50m);
 
         _differentials = new List<ShiftDifferential>
@@ -33,6 +38,43 @@ public sealed class ScheduleService
     public void UpdateSelection(ScheduleSelection selection)
     {
         _selection = selection;
+    }
+
+    public async Task<ScheduleSelection?> GetSelectionForUserAsync(Guid userId)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var persisted = await db.UserScheduleSelections.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId);
+        if (persisted is null)
+        {
+            return null;
+        }
+
+        return new ScheduleSelection(
+            persisted.ScheduleType,
+            persisted.ShiftType,
+            persisted.StartDate,
+            persisted.PlatoonDaysOff,
+            persisted.RotatingOffStartDay);
+    }
+
+    public async Task SaveSelectionForUserAsync(Guid userId, ScheduleSelection selection)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var existing = await db.UserScheduleSelections.SingleOrDefaultAsync(x => x.UserId == userId);
+        if (existing is null)
+        {
+            existing = new UserScheduleSelection { UserId = userId };
+            db.UserScheduleSelections.Add(existing);
+        }
+
+        existing.ScheduleType = selection.ScheduleType;
+        existing.ShiftType = selection.ShiftType;
+        existing.StartDate = selection.StartDate;
+        existing.PlatoonDaysOff = selection.PlatoonDaysOff;
+        existing.RotatingOffStartDay = selection.RotatingOffStartDay;
+        existing.UpdatedAtUtc = DateTime.UtcNow;
+
+        await db.SaveChangesAsync();
     }
 
     public WeeklyScheduleSummary BuildWeeklySummary(DateOnly weekStart)
