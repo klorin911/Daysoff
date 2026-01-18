@@ -27,7 +27,7 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddSingleton<DaysOff.Services.ScheduleService>();
+builder.Services.AddScoped<DaysOff.Services.ScheduleService>();
 builder.Services.AddScoped<DaysOff.Services.AuthService>();
 builder.Services.AddScoped<AccountService>();
 
