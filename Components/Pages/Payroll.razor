@@ -1,0 +1,100 @@
+@page "/payroll"
+@rendermode InteractiveServer
+@using DaysOff.Models
+@using DaysOff.Services
+@inject ScheduleService ScheduleService
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Payroll Export</PageTitle>
+
+<div class="page-header">
+    <h2>Payroll Export</h2>
+    <p class="text-muted">Review weekly totals and download a CSV for payroll processing.</p>
+</div>
+
+<div class="app-card mb-4 p-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="week-start">Week Starting</label>
+            <InputDate id="week-start" class="form-control" @bind-Value="_weekStartInput" @bind-Value:after="OnWeekStartChanged" />
+        </div>
+        <div class="col-12 col-md-4">
+            <button class="btn btn-primary" type="button" @onclick="DownloadCsv">Download CSV</button>
+        </div>
+    </div>
+</div>
+
+<div class="app-card p-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle app-table mb-0">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Total Hours</th>
+                    <th>Base Pay</th>
+                    <th>Differentials</th>
+                    <th>Total Pay</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in _summaryItems)
+                {
+                    <tr>
+                        <td>@item.EmployeeName</td>
+                        <td>@item.Department</td>
+                        <td>@item.TotalHours.ToString("0.##")</td>
+                        <td>@item.BasePay.ToString("C")</td>
+                        <td>@item.DifferentialPay.ToString("C")</td>
+                        <td class="fw-semibold">@item.TotalPay.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private DateTime? _weekStartInput = DateTime.Today;
+    private List<EmployeePayrollSummary> _summaryItems = new();
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+    }
+
+    private void OnWeekStartChanged()
+    {
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        if (!_weekStartInput.HasValue) return;
+        
+        var weekStart = GetWeekStart(DateOnly.FromDateTime(_weekStartInput.Value));
+        var summary = ScheduleService.BuildPayrollSummary(weekStart);
+        
+        _summaryItems.Clear();
+        if (summary != null)
+        {
+            _summaryItems.Add(summary);
+        }
+    }
+
+    private async Task DownloadCsv()
+    {
+        if (!_weekStartInput.HasValue) return;
+        
+        var weekStart = GetWeekStart(DateOnly.FromDateTime(_weekStartInput.Value));
+        var csv = ScheduleService.BuildPayrollCsv(weekStart);
+        var fileName = $"payroll-{weekStart:yyyyMMdd}.csv";
+        await JsRuntime.InvokeVoidAsync("downloadFile", fileName, csv);
+    }
+
+    private static DateOnly GetWeekStart(DateOnly date)
+    {
+        var offset = ((int)date.DayOfWeek + 6) % 7;
+        return date.AddDays(-offset);
+    }
+}
