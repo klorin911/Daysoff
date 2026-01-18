@@ -21,7 +21,7 @@ DaysOff is a small ASP.NET Core (Blazor Server) app for previewing rotating work
 
 ### Year preview
 
-![Year preview](docs/screenshots/schedule-year-view.png)
+![Year preview](docs/screenshots/year%20view.png)
 
 ## Quickstart
 

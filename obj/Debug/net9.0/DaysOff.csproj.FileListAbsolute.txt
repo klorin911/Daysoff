@@ -189,3 +189,4 @@
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.csproj.Up2Date
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/si3qeca82d-zcvjohq3sm.gz
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/0v9ycxd6qk-zcvjohq3sm.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.sourcelink.json
