@@ -129,7 +129,7 @@ public sealed class ScheduleService
 
         var isWorkDay = _selection.ScheduleType switch
         {
-            ScheduleType.FiveByEight => IsFiveByEightWorkDay(date, startDate),
+            ScheduleType.FiveByEight => IsFiveByEightWorkDay(date),
             ScheduleType.PlatoonTen => IsPlatoonWorkDay(date, startDate, _selection.PlatoonDaysOff),
             ScheduleType.RotatingFourByTen => IsRotatingWorkDay(date, startDate, _selection.RotatingOffStartDay),
             _ => false
@@ -140,7 +140,7 @@ public sealed class ScheduleService
         return new ScheduleDay(date, true, isWorkDay, _selection.ShiftType, start, end, isWorkDay ? hours : 0m);
     }
 
-    private static bool IsFiveByEightWorkDay(DateOnly date, DateOnly startDate)
+    private static bool IsFiveByEightWorkDay(DateOnly date)
     {
         var dayIndex = GetDayIndex(date);
         return dayIndex <= 4;
@@ -234,17 +234,6 @@ public sealed class ScheduleService
     {
         var result = value % modulo;
         return result < 0 ? result + modulo : result;
-    }
-
-    private static decimal CalculateHours(TimeOnly start, TimeOnly end)
-    {
-        var startMinutes = start.ToTimeSpan().TotalMinutes;
-        var endMinutes = end.ToTimeSpan().TotalMinutes;
-        var minutes = endMinutes >= startMinutes
-            ? endMinutes - startMinutes
-            : (24 * 60 - startMinutes) + endMinutes;
-
-        return (decimal)minutes / 60m;
     }
 
     private static string Escape(string value)
