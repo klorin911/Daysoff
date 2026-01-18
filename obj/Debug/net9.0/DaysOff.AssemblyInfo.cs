@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DaysOff")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f4797839182ed2151de479f8b9325e797323458")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+350d2ac895fe0b1eab9cf4e752487dd73032f1a6")]
 [assembly: System.Reflection.AssemblyProductAttribute("DaysOff")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DaysOff")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
