@@ -1,5 +1,6 @@
 ﻿<header class="app-topbar">
 	@using Microsoft.AspNetCore.Components.Authorization
+    @inject NavigationManager Nav
     <div class="app-topbar-inner">
         <a class="app-brand" href="">
             <span class="brand-name">Days Off</span>
@@ -23,9 +24,10 @@
 
 				<AuthorizeView>
 					<Authorized>
-						<button type="button" class="nav-link btn btn-link" style="padding: 0;" @onclick="Logout">
-							Logout
-						</button>
+						<form method="post" action="/auth/logout" style="display: inline;">
+							<input type="hidden" name="returnUrl" value="@ReturnUrl" />
+							<button type="submit" class="nav-link btn btn-link" style="padding: 0;">Logout</button>
+						</form>
 					</Authorized>
 					<NotAuthorized>
 						<NavLink class="nav-link" href="login">
@@ -41,8 +43,13 @@
 </header>
 
 @code {
-    [Inject] private DaysOff.Services.AuthService Auth { get; set; } = null!;
-
-    private Task Logout() => Auth.SignOutAsync();
+    private string ReturnUrl
+    {
+        get
+        {
+            var relative = Nav.ToBaseRelativePath(Nav.Uri);
+            return string.IsNullOrWhiteSpace(relative) ? "/" : (relative.StartsWith('/') ? relative : "/" + relative);
+        }
+    }
 }
 

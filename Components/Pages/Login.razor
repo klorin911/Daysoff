@@ -1,8 +1,6 @@
 @page "/login"
 @rendermode InteractiveServer
-@using System.ComponentModel.DataAnnotations
-@using DaysOff.Services
-@inject AuthService Auth
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Nav
 
 <PageTitle>Login</PageTitle>
@@ -10,19 +8,17 @@
 <div class="app-card p-4" style="max-width: 480px;">
     <h3 class="mb-3">Login</h3>
 
-    <EditForm Model="_model" OnValidSubmit="HandleSubmit">
-        <DataAnnotationsValidator />
+    <form method="post" action="@(_mode == Mode.Login ? "/auth/login" : "/auth/register")">
+        <input type="hidden" name="returnUrl" value="@_returnUrl" />
 
         <div class="mb-3">
             <label class="form-label">Email</label>
-            <InputText class="form-control" @bind-Value="_model.Email" />
-            <ValidationMessage For="() => _model.Email" />
+            <input class="form-control" name="email" type="email" autocomplete="username" required @bind="_model.Email" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Password</label>
-            <InputText class="form-control" type="password" @bind-Value="_model.Password" />
-            <ValidationMessage For="() => _model.Password" />
+            <input class="form-control" name="password" type="password" autocomplete="current-password" minlength="6" required @bind="_model.Password" />
         </div>
 
         @if (!string.IsNullOrWhiteSpace(_error))
@@ -31,44 +27,42 @@
         }
 
         <div class="d-flex gap-2">
-            <button class="btn btn-primary" type="submit" disabled="@_busy">
+            <button class="btn btn-primary" type="submit">
                 @(_mode == Mode.Login ? "Login" : "Register")
             </button>
-            <button class="btn btn-outline-secondary" type="button" @onclick="ToggleMode" disabled="@_busy">
+            <button class="btn btn-outline-secondary" type="button" @onclick="ToggleMode">
                 @(_mode == Mode.Login ? "Need an account?" : "Already have an account?")
             </button>
         </div>
-    </EditForm>
+    </form>
 </div>
 
 @code {
     private readonly Model _model = new();
     private Mode _mode = Mode.Login;
-    private bool _busy;
     private string? _error;
+    private string _returnUrl = "/schedule";
 
-    private async Task HandleSubmit()
+    protected override void OnInitialized()
     {
-        _busy = true;
-        _error = null;
-        try
-        {
-            (bool Success, string? Error) result = _mode == Mode.Login
-                ? await Auth.SignInAsync(_model.Email, _model.Password)
-                : await Auth.RegisterAndSignInAsync(_model.Email, _model.Password);
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
 
-            if (!result.Success)
-            {
-                _error = result.Error;
-            }
-            else
-            {
-                Nav.NavigateTo("/schedule", forceLoad: true);
-            }
-        }
-        finally
+        if (query.TryGetValue("mode", out var modeRaw) &&
+            modeRaw.ToString().Equals("register", StringComparison.OrdinalIgnoreCase))
         {
-            _busy = false;
+            _mode = Mode.Register;
+        }
+
+        if (query.TryGetValue("error", out var errorRaw))
+        {
+            _error = errorRaw.ToString();
+        }
+
+        if (query.TryGetValue("returnUrl", out var returnUrlRaw))
+        {
+            var candidate = returnUrlRaw.ToString();
+            _returnUrl = IsLocalUrl(candidate) ? candidate : "/schedule";
         }
     }
 
@@ -86,12 +80,11 @@
 
     private sealed class Model
     {
-        [Required]
-        [EmailAddress]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [MinLength(6)]
         public string Password { get; set; } = string.Empty;
     }
+
+    private static bool IsLocalUrl(string? url)
+        => !string.IsNullOrWhiteSpace(url) && url.StartsWith('/') && !url.StartsWith("//") && !url.StartsWith("/\\");
 }
