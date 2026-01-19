@@ -188,5 +188,5 @@
 /Users/kylerlorin/projects/daysoff/bin/Debug/net9.0/runtimes/win-x86/native/e_sqlite3.dll
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.csproj.Up2Date
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.sourcelink.json
-/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/si3qeca82d-bifl1hf30d.gz
-/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/0v9ycxd6qk-bifl1hf30d.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/si3qeca82d-pusoga7rao.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/0v9ycxd6qk-pusoga7rao.gz

@@ -318,7 +318,7 @@
                     <div class="calendar-month">
                         <div class="calendar-month__title">@monthStart.ToString("MMMM yyyy")</div>
                         <div class="calendar-grid">
-                            @foreach (var name in _dayNames)
+                            @foreach (var name in _calendarDayNames)
                             {
                                 <div class="calendar-cell calendar-cell--head">@name[..1]</div>
                             }
@@ -357,6 +357,11 @@
     private static readonly string[] _dayNames =
     {
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    };
+
+    private static readonly string[] _calendarDayNames =
+    {
+        "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
     };
 
     private readonly ScheduleSelectionModel _selection = new();
@@ -650,8 +655,8 @@
         var start = new DateOnly(monthStart.Year, monthStart.Month, 1);
         var endInclusive = start.AddMonths(1).AddDays(-1);
 
-        var first = GetWeekStart(start);
-        var last = GetWeekStart(endInclusive).AddDays(6);
+        var first = GetWeekStartSunday(start);
+        var last = GetWeekStartSunday(endInclusive).AddDays(6);
 
         var dates = new List<DateOnly>();
         var d = first;
@@ -668,6 +673,11 @@
     {
         var offset = (((int)date.DayOfWeek + 6) % 7 + 7) % 7;
         return date.AddDays(-offset);
+    }
+
+    private static DateOnly GetWeekStartSunday(DateOnly date)
+    {
+        return date.AddDays(-(int)date.DayOfWeek);
     }
 
     private enum PreviewMode
