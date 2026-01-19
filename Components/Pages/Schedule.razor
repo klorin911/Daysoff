@@ -269,7 +269,7 @@
                                         }
                                         else if (day.IsWorkDay)
                                         {
-                                            <span class="status-chip status-chip--work">Work</span>
+                                            <span class="status-chip status-chip--work">WK</span>
                                         }
                                         else
                                         {
@@ -327,8 +327,9 @@
                             {
                                 var inMonth = date.Month == monthStart.Month && date.Year == monthStart.Year;
                                 var day = GetDayForDate(date);
+                                var statusClass = day?.IsWorkDay == true ? "calendar-cell--work" : (day is not null && !day.IsWorkDay && day.IsActive ? "calendar-cell--off" : "");
 
-                                <div class="calendar-cell @(inMonth ? "" : "calendar-cell--muted")">
+                                <div class="calendar-cell @(inMonth ? "" : "calendar-cell--muted") @statusClass">
                                     <div class="calendar-date">@date.Day</div>
                                     @if (day is null || !day.IsActive)
                                     {
@@ -336,7 +337,7 @@
                                     }
                                     else if (day.IsWorkDay)
                                     {
-                                        <span class="status-chip status-chip--work">Work</span>
+                                        <span class="status-chip status-chip--work">WK</span>
                                     }
                                     else
                                     {

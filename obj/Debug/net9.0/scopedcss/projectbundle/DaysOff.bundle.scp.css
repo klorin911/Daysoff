@@ -395,28 +395,36 @@
     gap: 1rem;
 }
 
+.calendar-month[b-14oft04w09] {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-md);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    padding: 1rem;
+}
+
 .calendar-month__title[b-14oft04w09] {
     font-weight: 700;
     color: var(--app-text);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .calendar-grid[b-14oft04w09] {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 0.45rem;
+    gap: clamp(0.25rem, 0.8vw, 0.45rem);
 }
 
 .calendar-cell[b-14oft04w09] {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: clamp(0.25rem, 0.8vw, 0.4rem);
     border: 1px solid rgba(15, 23, 42, 0.08);
     border-radius: 10px;
-    padding: 0.45rem;
-    background: #fff;
-    min-height: 64px;
-    overflow: hidden;
+    padding: clamp(0.2rem, 0.6vw, 0.35rem);
+    min-height: clamp(48px, 7vw, 60px);
 }
 
 .calendar-cell--head[b-14oft04w09] {
@@ -441,15 +449,45 @@
 
 .calendar-cell .status-chip[b-14oft04w09] {
     margin-top: auto;
-    font-size: 0.7rem;
-    padding: 0.12rem 0.4rem;
-    border-radius: 999px;
-    display: inline-flex;
-    width: fit-content;
+    font-size: clamp(0.45rem, 1.3vw, 0.65rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    display: block;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
-    max-width: 100%;
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: clip;
+    text-transform: uppercase;
+}
+
+.calendar-cell .status-chip--work[b-14oft04w09] {
+    color: #065f46;
+}
+
+.calendar-cell .status-chip--off[b-14oft04w09] {
+    color: #1e3a8a;
+}
+
+.calendar-cell--work[b-14oft04w09] {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.calendar-cell--off[b-14oft04w09] {
+    background-color: rgba(59, 130, 246, 0.08) !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
+}
+
+.calendar-cell .status-chip--empty[b-14oft04w09] {
+    color: var(--app-muted);
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
 }
 
 @media (max-width: 992px) {
