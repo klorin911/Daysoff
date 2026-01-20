@@ -71,7 +71,6 @@
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.genruntimeconfig.cache
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/ref/DaysOff.dll
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/scopedcss/Components/Pages/Schedule.razor.rz.scp.css
-/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/2qbf8nc7w7-kbjp7rdb7x.gz
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.csproj.AssemblyReference.cache
 /Users/kylerlorin/projects/daysoff/bin/Debug/net9.0/Humanizer.dll
 /Users/kylerlorin/projects/daysoff/bin/Debug/net9.0/Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
@@ -188,5 +187,6 @@
 /Users/kylerlorin/projects/daysoff/bin/Debug/net9.0/runtimes/win-x86/native/e_sqlite3.dll
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.csproj.Up2Date
 /Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/DaysOff.sourcelink.json
-/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/si3qeca82d-pusoga7rao.gz
-/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/0v9ycxd6qk-pusoga7rao.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/2qbf8nc7w7-thcpncjr5b.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/si3qeca82d-b4kfdgf59d.gz
+/Users/kylerlorin/projects/daysoff/obj/Debug/net9.0/compressed/0v9ycxd6qk-b4kfdgf59d.gz

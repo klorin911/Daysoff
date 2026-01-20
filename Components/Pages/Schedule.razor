@@ -33,7 +33,9 @@
                             aria-expanded="@IsPickerOpen(SchedulePicker)"
                             aria-controls="schedule-panel">
                         <span>@GetScheduleLabel(_selection.ScheduleType)</span>
-                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                        <span class="month-picker__chevron" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
                     </button>
                     @if (IsPickerOpen(SchedulePicker))
                     {
@@ -66,7 +68,9 @@
                             aria-expanded="@IsPickerOpen(ShiftPicker)"
                             aria-controls="shift-panel">
                         <span>@GetShiftLabel(_selection.ShiftType)</span>
-                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                        <span class="month-picker__chevron" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
                     </button>
                     @if (IsPickerOpen(ShiftPicker))
                     {
@@ -99,7 +103,9 @@
                             aria-expanded="@_isMonthPickerOpen"
                             aria-controls="start-month-panel">
                         <span>@_selection.StartMonth.ToString("MMMM yyyy")</span>
-                        <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                        <span class="month-picker__chevron" aria-hidden="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </span>
                     </button>
                     @if (_isMonthPickerOpen)
                     {
@@ -143,7 +149,9 @@
                                 aria-expanded="@IsPickerOpen(PlatoonPicker)"
                                 aria-controls="platoon-panel">
                             <span>@GetPlatoonDaysOffLabel(_selection.PlatoonDaysOff)</span>
-                            <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                            <span class="month-picker__chevron" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </span>
                         </button>
                         @if (IsPickerOpen(PlatoonPicker))
                         {
@@ -178,7 +186,9 @@
                                 aria-expanded="@IsPickerOpen(RotatingPicker)"
                                 aria-controls="rotating-panel">
                             <span>@GetRotatingOffLabel(_selection.RotatingOffStartDay)</span>
-                            <span class="month-picker__chevron" aria-hidden="true">▾</span>
+                            <span class="month-picker__chevron" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                            </span>
                         </button>
                         @if (IsPickerOpen(RotatingPicker))
                         {
@@ -203,8 +213,18 @@
         </div>
 
         <div class="selection-actions">
-            <button class="btn btn-primary save-btn" type="button" @onclick="SaveSelection">Save Selection</button>
-            @if (!string.IsNullOrWhiteSpace(_statusMessage))
+            <button class="btn btn-primary save-btn @(_showSaveSuccess ? "btn-success" : "")" type="button" @onclick="SaveSelection">
+                @if (_showSaveSuccess)
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="me-1"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span>Saved</span>
+                }
+                else
+                {
+                    <span>Save Selection</span>
+                }
+            </button>
+            @if (!string.IsNullOrWhiteSpace(_statusMessage) && !_showSaveSuccess)
             {
                 <span class="status-msg">@_statusMessage</span>
             }
@@ -220,6 +240,9 @@
             <div class="schedule-year-header mb-3">
                 <h5 class="card-title mb-0">Year View</h5>
                 <div class="schedule-year-actions">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="JumpToToday">
+                        Today
+                    </button>
                     <div class="btn-group" role="group" aria-label="Schedule view">
                         <button type="button"
                                 class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Table ? "active" : "")"
@@ -239,7 +262,7 @@
                             class="btn btn-sm btn-outline-secondary"
                             @onclick="ToggleYearCollapse"
                             aria-expanded="@(!_isYearCollapsed)">
-                        @(_isYearCollapsed ? "Show all months" : "Show fewer months")
+                        @(_isYearCollapsed ? "Show full year" : "Show upcoming")
                     </button>
                 </div>
             </div>
@@ -261,8 +284,11 @@
                                 <td class="text-nowrap fw-bold text-muted">@week.WeekStart.ToString("MMM dd")</td>
                                 @foreach (var day in week.Days)
                                 {
-                                    <td class="p-2">
-                                        <div class="small text-muted mb-1">@day.Date.ToString("MM/dd")</div>
+                                    <td class="p-2 @(day.Date == _today ? "is-today-cell" : "")">
+                                        <div class="small text-muted mb-1 @(day.Date == _today ? "is-today-label" : "")">
+                                            @day.Date.ToString("MM/dd")
+                                            @if (day.Date == _today) { <span class="today-indicator">•</span> }
+                                        </div>
                                         @if (!day.IsActive)
                                         {
                                             <span class="status-chip status-chip--empty">-</span>
@@ -290,6 +316,9 @@
             <div class="schedule-year-header mb-3">
                 <h5 class="card-title mb-0">Calendar View</h5>
                 <div class="schedule-year-actions">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="JumpToToday">
+                        Today
+                    </button>
                     <div class="btn-group" role="group" aria-label="Schedule view">
                         <button type="button"
                                 class="btn btn-sm btn-outline-secondary @(_previewMode == PreviewMode.Table ? "active" : "")"
@@ -328,9 +357,13 @@
                                 var inMonth = date.Month == monthStart.Month && date.Year == monthStart.Year;
                                 var day = GetDayForDate(date);
                                 var statusClass = day?.IsWorkDay == true ? "calendar-cell--work" : (day is not null && !day.IsWorkDay && day.IsActive ? "calendar-cell--off" : "");
+                                var todayClass = date == _today ? "is-today" : "";
 
-                                <div class="calendar-cell @(inMonth ? "" : "calendar-cell--muted") @statusClass">
-                                    <div class="calendar-date">@date.Day</div>
+                                <div class="calendar-cell @(inMonth ? "" : "calendar-cell--muted") @statusClass @todayClass">
+                                    <div class="calendar-date">
+                                        @date.Day
+                                        @if (date == _today) { <span class="today-dot"></span> }
+                                    </div>
                                     @if (day is null || !day.IsActive)
                                     {
                                         <span class="status-chip status-chip--empty">-</span>
@@ -449,6 +482,15 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    private DateOnly _today = DateOnly.FromDateTime(DateTime.Today);
+    private bool _showSaveSuccess;
+    private int _saveMessageToken;
+
+    private void JumpToToday()
+    {
+        SelectThisMonth();
+    }
+
     private async Task SaveSelection()
     {
         var selection = new ScheduleSelection(
@@ -464,11 +506,26 @@
         if (userId is Guid id)
         {
             await ScheduleService.SaveSelectionForUserAsync(id, selection);
-            _statusMessage = "Schedule saved.";
+            _statusMessage = "Saved";
+            _showSaveSuccess = true;
+            _saveMessageToken++;
+            var saveToken = _saveMessageToken;
+            // Reset success state after 3 seconds
+            _ = Task.Delay(3000).ContinueWith(_ =>
+            {
+                if (saveToken != _saveMessageToken)
+                {
+                    return;
+                }
+
+                _showSaveSuccess = false;
+                _statusMessage = null;
+                InvokeAsync(StateHasChanged);
+            });
         }
         else
         {
-            _statusMessage = "Log in to save your schedule.";
+            _statusMessage = "Log in to save";
         }
 
         UpdatePreview();
@@ -593,6 +650,7 @@
 
     private void UpdatePreview()
     {
+        _today = DateOnly.FromDateTime(DateTime.Today);
         ScheduleService.UpdateSelection(new ScheduleSelection(
             _selection.ScheduleType,
             _selection.ShiftType,

@@ -4,11 +4,11 @@
     --app-bg: #f4f5f7;
     --app-surface: #ffffff;
     --app-surface-alt: #eff4f9;
-    --app-primary: #1d4ed8;
-    --app-primary-dark: #1e40af;
+    --app-primary: #0f766e;
+    --app-primary-dark: #115e59;
     --app-accent: #0f766e;
-    --app-text: #0b1220;
-    --app-muted: #5b6475;
+    --app-text: #334155;
+    --app-muted: #64748b;
     --app-border: #d7dee8;
     --app-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
     --app-radius-lg: 20px;
@@ -25,7 +25,7 @@ html, body {
 
 body {
     margin: 0;
-    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-family: "Avenir Next", "Avenir", "Helvetica Neue", "Noto Sans", sans-serif;
     background:
         radial-gradient(circle at top left, rgba(255, 241, 202, 0.55), transparent 55%),
         radial-gradient(circle at 12% 30%, rgba(191, 219, 254, 0.6), transparent 50%),
@@ -75,7 +75,7 @@ a:hover {
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem #fff, 0 0 0 0.25rem rgba(79, 70, 229, 0.2);
+    box-shadow: 0 0 0 0.1rem #fff, 0 0 0 0.25rem rgba(15, 118, 110, 0.22);
 }
 
 .page-header {
@@ -149,8 +149,8 @@ a:hover {
 .chip {
     border-radius: 999px;
     padding: 0.3rem 0.7rem;
-    background: rgba(29, 78, 216, 0.12);
-    color: #1e3a8a;
+    background: rgba(15, 118, 110, 0.1);
+    color: #0f766e;
     font-size: 0.78rem;
     font-weight: 600;
 }
@@ -298,7 +298,7 @@ a:hover {
 }
 
 .app-table tbody tr:hover {
-    background: rgba(79, 70, 229, 0.04);
+    background: rgba(15, 118, 110, 0.04);
 }
 
 .status-chip {
@@ -314,14 +314,14 @@ a:hover {
 
 .status-chip--work {
     color: #047857;
-    background: rgba(16, 185, 129, 0.14);
-    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.25);
 }
 
 .status-chip--off {
     color: #475569;
-    background: rgba(100, 116, 139, 0.12);
-    border-color: rgba(100, 116, 139, 0.25);
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.25);
 }
 
 .status-chip--empty {
@@ -461,6 +461,15 @@ a:hover {
     font-weight: 600 !important;
     text-transform: none !important;
     letter-spacing: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: all 0.2s ease;
+}
+
+.save-btn.btn-success {
+    background-color: #059669;
+    border-color: #059669;
 }
 
 .status-msg {
